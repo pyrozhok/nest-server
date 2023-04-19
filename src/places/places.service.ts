@@ -35,9 +35,10 @@ export class PlacesService {
     const place = await this.placeRepository.findOne({
       where: { id },
       relations: {
-        tags: true,
+        district: true,
         images: true,
         touristArea: true,
+        tags: true,
       },
     });
 
@@ -72,7 +73,10 @@ export class PlacesService {
     throw new PlaceNotFoundException(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} place`;
+  async remove(id: number) {
+    const deleteResponse = await this.placeRepository.delete(id);
+    if (!deleteResponse.affected) {
+      throw new PlaceNotFoundException(id);
+    }
   }
 }

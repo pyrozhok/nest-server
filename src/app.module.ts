@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { LocalFilesModule } from './local-files/local-files.module';
 import { TouristAreasModule } from './tourist-areas/tourist-areas.module';
+import { DistrictsModule } from './districts/districts.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TouristAreasModule } from './tourist-areas/tourist-areas.module';
     ImagesModule,
     LocalFilesModule,
     TouristAreasModule,
+    DistrictsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
