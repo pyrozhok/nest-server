@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LocalFilesService } from 'src/local-files/local-files.service';
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
@@ -15,9 +16,10 @@ export class PlacesService {
     private localFileService: LocalFilesService,
   ) {}
 
-  async create(place: CreatePlaceDto) {
+  async create(place: CreatePlaceDto, user: User) {
     const newPlace = await this.placeRepository.create({
       ...place,
+      author: user,
     });
     await this.placeRepository.save(newPlace);
     return newPlace;

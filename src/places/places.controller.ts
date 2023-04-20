@@ -11,20 +11,22 @@ import {
   UploadedFile,
   ParseFilePipeBuilder,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { PlacesService } from './places.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import LocalFilesInterceptor from 'src/local-files/local-files.interceptor';
+import RequestWithUser from 'src/authentication/requestWithUser.interface';
 
 @Controller('places')
 export class PlacesController {
   constructor(private readonly placesService: PlacesService) {}
 
   @Post()
-  create(@Body() createPlaceDto: CreatePlaceDto) {
-    return this.placesService.create(createPlaceDto);
+  createPlace(@Body() place: CreatePlaceDto, @Req() req: RequestWithUser) {
+    return this.placesService.create(place, req.user);
   }
 
   @Post(':id/image')
