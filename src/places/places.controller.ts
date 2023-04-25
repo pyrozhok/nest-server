@@ -12,6 +12,7 @@ import {
   ParseFilePipeBuilder,
   HttpStatus,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { PlacesService } from './places.service';
@@ -19,17 +20,20 @@ import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import LocalFilesInterceptor from 'src/local-files/local-files.interceptor';
 import RequestWithUser from 'src/authentication/requestWithUser.interface';
+import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
 
 @Controller('places')
 export class PlacesController {
   constructor(private readonly placesService: PlacesService) {}
 
   @Post()
+  @UseGuards(JwtAuthenticationGuard)
   createPlace(@Body() place: CreatePlaceDto, @Req() req: RequestWithUser) {
     return this.placesService.create(place, req.user);
   }
 
   @Post(':id/image')
+  @UseGuards(JwtAuthenticationGuard)
   @UseInterceptors(
     LocalFilesInterceptor({
       fieldName: 'file',
@@ -75,11 +79,13 @@ export class PlacesController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthenticationGuard)
   update(@Param('id') id: string, @Body() place: UpdatePlaceDto) {
     return this.placesService.update(+id, place);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthenticationGuard)
   remove(@Param('id') id: string) {
     return this.placesService.remove(+id);
   }

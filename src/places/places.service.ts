@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { District } from 'src/districts/entities/district.entity';
 import { LocalFilesService } from 'src/local-files/local-files.service';
+import { Tag } from 'src/tags/entities/tag.entity';
+import { TouristArea } from 'src/tourist-areas/entities/tourist-area.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { Place } from './entities/place.entity';
@@ -10,10 +13,17 @@ import PlaceNotFoundException from './exceptions/placeNotFound.exception';
 
 @Injectable()
 export class PlacesService {
+  private readonly logger = new Logger(PlacesService.name);
   constructor(
     @InjectRepository(Place)
     private placeRepository: Repository<Place>,
     private localFileService: LocalFilesService,
+    @InjectRepository(Tag)
+    private tagRepository: Repository<Tag>,
+    @InjectRepository(District)
+    private districtRepository: Repository<District>,
+    @InjectRepository(TouristArea)
+    private touristAreaRepository: Repository<TouristArea>,
   ) {}
 
   async create(place: CreatePlaceDto, user: User) {
@@ -50,10 +60,72 @@ export class PlacesService {
     throw new PlaceNotFoundException(id);
   }
 
-  async update(id: number, place: UpdatePlaceDto) {
-    await this.placeRepository.update(id, place);
+  async update(id: number, updatePlaceDto: UpdatePlaceDto) {
+    const place = await this.placeRepository.findOne({
+      where: { id },
+      relations: {
+        district: true,
+        images: true,
+        touristArea: true,
+        tags: true,
+      },
+    });
+
+    const {
+      title,
+      description,
+      shortDescription,
+      latitude,
+      longitude,
+      elevation,
+      howToGetByCar,
+      howToGetByPublicTransport,
+      howToGetByTransfer,
+      keywords,
+      districtId,
+      touristAreaId,
+      tagIds,
+    } = updatePlaceDto;
+
+    place.title = title;
+    place.description = description;
+    place.shortDescription = shortDescription;
+    place.latitude = latitude;
+    place.longitude = longitude;
+    place.elevation = elevation;
+    place.howToGetByCar = howToGetByCar;
+    place.howToGetByPublicTransport = howToGetByPublicTransport;
+    place.howToGetByTransfer = howToGetByTransfer;
+    place.keywords = keywords;
+
+    if (districtId) {
+      const district = await this.districtRepository.findOne({
+        where: { id: districtId },
+      });
+      place.district = district;
+    }
+
+    if (touristAreaId) {
+      const touristArea = await this.touristAreaRepository.findOne({
+        where: { id: touristAreaId },
+      });
+      place.touristArea = touristArea;
+    }
+
+    if (tagIds) {
+      const tags = await this.tagRepository.findBy({ id: In(tagIds) });
+      place.tags = tags;
+    }
+    await this.placeRepository.save(place);
+
     const updatedPlace = await this.placeRepository.findOne({
       where: { id },
+      relations: {
+        district: true,
+        images: true,
+        touristArea: true,
+        tags: true,
+      },
     });
 
     if (updatedPlace) {
