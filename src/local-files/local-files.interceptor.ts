@@ -40,6 +40,7 @@ function LocalFilesInterceptor(
       return this.fileInterceptor.intercept(...args);
     }
   }
+
   return mixin(Interceptor);
 }
 

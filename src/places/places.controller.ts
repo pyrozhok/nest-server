@@ -13,6 +13,7 @@ import {
   HttpStatus,
   Req,
   UseGuards,
+  UploadedFiles,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { PlacesService } from './places.service';
@@ -57,7 +58,7 @@ export class PlacesController {
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|gif)$/,
+          fileType: /(jpg|jpeg|png)$/,
         })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -67,6 +68,32 @@ export class PlacesController {
   ) {
     return this.placesService.updateImage(+id, file.filename);
   }
+
+  /* Previous implementation */
+  /* @Post(':id/images')
+  @UseGuards(JwtAuthenticationGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  async addImages(
+    @Param('id') id: string,
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(jpg|jpeg|png)$/,
+        })
+        .addMaxSizeValidator({
+          maxSize: Math.pow(1024, 2), // 1MB
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    files: Array<Express.Multer.File>,
+  ) {
+    console.log(
+      '🚀 ~ file: places.controller.ts:105 ~ PlacesController ~ files:',
+      files,
+    );
+  } */
 
   @Get()
   findAll() {
