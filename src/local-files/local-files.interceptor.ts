@@ -3,6 +3,7 @@ import { Injectable, mixin, NestInterceptor, Type } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 interface LocalFilesInterceptorOptions {
   fieldName: string;
@@ -25,6 +26,12 @@ function LocalFilesInterceptor(
       const multerOptions: MulterOptions = {
         storage: diskStorage({
           destination,
+          filename: (req, file, cb) => {
+            const originalName = file.originalname;
+            const extension = extname(originalName);
+            const filename = `${Date.now()}${extension}`;
+            cb(null, filename);
+          },
         }),
         fileFilter: options.fileFilter,
         limits: options.limits,
@@ -40,6 +47,7 @@ function LocalFilesInterceptor(
       return this.fileInterceptor.intercept(...args);
     }
   }
+
   return mixin(Interceptor);
 }
 

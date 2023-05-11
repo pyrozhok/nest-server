@@ -1,42 +1,36 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  StreamableFile,
+  Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { LocalFilesService } from './local-files.service';
-// import { CreateLocalFileDto } from './dto/create-local-file.dto';
-// import { UpdateLocalFileDto } from './dto/update-local-file.dto';
+import { Response } from 'express';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 @Controller('local-files')
+@UseInterceptors(ClassSerializerInterceptor)
 export class LocalFilesController {
   constructor(private readonly localFilesService: LocalFilesService) {}
 
-  /*   @Post()
-  create(@Body() createLocalFileDto: CreateLocalFileDto) {
-    return this.localFilesService.create(createLocalFileDto);
-  } */
-
-  @Get()
-  findAll() {
-    return this.localFilesService.findAll();
-  }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.localFilesService.findOne(+id);
-  }
+  async getDatabaseFileById(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const file = await this.localFilesService.getFileById(id);
 
-  /* @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLocalFileDto: UpdateLocalFileDto) {
-    return this.localFilesService.update(+id, updateLocalFileDto);
-  } */
+    const stream = createReadStream(join(process.cwd(), file.path));
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.localFilesService.remove(+id);
+    response.set({
+      'Content-Disposition': `inline; filename="${file.filename}"`,
+      'Content-Type': file.mimetype,
+    });
+    return new StreamableFile(stream);
   }
 }

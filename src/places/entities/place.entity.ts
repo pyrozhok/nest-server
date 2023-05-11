@@ -7,10 +7,15 @@ import {
   OneToMany,
   JoinColumn,
   ManyToOne,
+  CreateDateColumn,
+  Index,
+  RelationId,
 } from 'typeorm';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { Image } from 'src/images/entities/image.entity';
 import { TouristArea } from 'src/tourist-areas/entities/tourist-area.entity';
+import { District } from 'src/districts/entities/district.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity({ name: 'places' })
 export class Place {
@@ -50,6 +55,9 @@ export class Place {
   @Column()
   keywords: string;
 
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
+
   @ManyToMany(() => Tag)
   @JoinTable({
     name: 'tags_places_relations',
@@ -78,11 +86,31 @@ export class Place {
   })
   images: Image[];
 
-  @ManyToOne((type) => TouristArea)
+  @ManyToOne(() => TouristArea)
   @JoinColumn({
     name: 'tourist_area_id',
     referencedColumnName: 'id',
     foreignKeyConstraintName: 'tourist_area_id_fkey',
   })
   touristArea: TouristArea;
+
+  @ManyToOne(() => District)
+  @JoinColumn({
+    name: 'district_id',
+    referencedColumnName: 'id',
+    foreignKeyConstraintName: 'places_district_id_fkey',
+  })
+  district: District;
+
+  @Index('places_author_id_fkey')
+  @ManyToOne(() => User, (author: User) => author.places)
+  @JoinColumn({
+    name: 'author_id',
+    referencedColumnName: 'id',
+    foreignKeyConstraintName: 'places_author_id_fkey',
+  })
+  public author: User;
+
+  @RelationId((place: Place) => place.author)
+  public authorId: number;
 }
