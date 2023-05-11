@@ -17,31 +17,31 @@ import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard'
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Post()
+  /*   @Post()
   @UseGuards(JwtAuthenticationGuard)
   create(@Body() createImageDto: CreateImageDto) {
     return this.imagesService.create(createImageDto);
-  }
+  } */
 
   @Get()
   findAll() {
     return this.imagesService.findAll();
   }
 
-  @Get(':id')
+  /*   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.imagesService.findOne(+id);
-  }
+  } */
 
-  @Patch(':id')
+  /*   @Patch(':id')
   @UseGuards(JwtAuthenticationGuard)
   update(@Param('id') id: string, @Body() updateImageDto: UpdateImageDto) {
     return this.imagesService.update(+id, updateImageDto);
-  }
+  } */
 
-  @Delete(':id')
+  /*   @Delete(':id')
   @UseGuards(JwtAuthenticationGuard)
   remove(@Param('id') id: string) {
     return this.imagesService.remove(+id);
-  }
+  } */
 }

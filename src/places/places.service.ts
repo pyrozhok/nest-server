@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { District } from 'src/districts/entities/district.entity';
-import { LocalFilesService } from 'src/local-files/local-files.service';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { TouristArea } from 'src/tourist-areas/entities/tourist-area.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -10,6 +9,7 @@ import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { Place } from './entities/place.entity';
 import PlaceNotFoundException from './exceptions/placeNotFound.exception';
+import { ImagesService } from 'src/images/images.service';
 
 @Injectable()
 export class PlacesService {
@@ -17,13 +17,14 @@ export class PlacesService {
   constructor(
     @InjectRepository(Place)
     private placeRepository: Repository<Place>,
-    private localFileService: LocalFilesService,
+
     @InjectRepository(Tag)
     private tagRepository: Repository<Tag>,
     @InjectRepository(District)
     private districtRepository: Repository<District>,
     @InjectRepository(TouristArea)
     private touristAreaRepository: Repository<TouristArea>,
+    private readonly imageService: ImagesService,
   ) {}
 
   async create(place: CreatePlaceDto, user: User) {
@@ -134,7 +135,7 @@ export class PlacesService {
     throw new PlaceNotFoundException(id);
   }
 
-  async updateImage(id: number, filename: string) {
+  async updateMainImage(id: number, filename: string) {
     await this.placeRepository.update(id, {
       mainImage: filename,
     });
@@ -145,6 +146,23 @@ export class PlacesService {
       return updatedPlace;
     }
     throw new PlaceNotFoundException(id);
+  }
+
+  /* It adds image to images table and then set relation to place at images_places_relations table */
+  async updateImage(id: number, filename: string) {
+    const place = await this.placeRepository.findOne({
+      where: { id },
+      relations: {
+        images: true,
+      },
+    });
+    if (!place) {
+      throw new PlaceNotFoundException(id);
+    }
+    const image = await this.imageService.createAndSaveImage(filename);
+
+    place.images.push(image);
+    await this.placeRepository.save(place);
   }
 
   async remove(id: number) {

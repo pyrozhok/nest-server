@@ -8,14 +8,16 @@ import { ConfigModule } from '@nestjs/config';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { District } from 'src/districts/entities/district.entity';
 import { TouristArea } from 'src/tourist-areas/entities/tourist-area.entity';
+import { ImagesModule } from 'src/images/images.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Place, Tag, District, TouristArea]),
     LocalFilesModule,
     ConfigModule,
+    ImagesModule,
   ],
   controllers: [PlacesController],
-  providers: [PlacesService],
+  providers: [PlacesService, PlacesService],
 })
 export class PlacesModule {}
