@@ -13,7 +13,6 @@ import {
   HttpStatus,
   Req,
   UseGuards,
-  UploadedFiles,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { PlacesService } from './places.service';

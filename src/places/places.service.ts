@@ -40,6 +40,7 @@ export class PlacesService {
     return this.placeRepository.find({
       relations: {
         tags: true,
+        author: true,
       },
     });
   }
@@ -52,6 +53,7 @@ export class PlacesService {
         images: true,
         touristArea: true,
         tags: true,
+        author: true,
       },
     });
 
